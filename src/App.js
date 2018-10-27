@@ -27,12 +27,25 @@ class App extends Component {
   }
 
   fetchIssues = () => {
-    fetch(`https://api.${this.state.domain}/users/${this.state.user}/repos`, {
+    fetch(`https://api.${this.state.domain}/graphql`, {
+      method: 'post',
       headers: { 'Authorization': `Basic ${window.btoa(this.state.apiKey)}` },
+      body: JSON.stringify({
+        query: `query($owner: String!, $name: String!) {
+          repository(owner: $owner, name: $name) {
+            issues(states:OPEN) {
+              totalCount
+            }
+          }
+        }`,
+        variables: {
+          owner: this.state.user,
+          name: this.state.repo,
+        },
+      }),
     })
-      .then(data => data.json())
-      .then(repos => repos.find(repo => repo.name === this.state.repo))
-      .then(repo => this.setState({ numOpenIssues: repo.open_issues_count }))
+      .then(response => response.json())
+      .then(({ data }) => this.setState({ numOpenIssues: data.repository.issues.totalCount }))
       .catch(e => console.error(e));
   }
 
