@@ -4,7 +4,7 @@ import './App.css';
 class App extends Component {
   state = {
     domain: '',
-    user: '',
+    owner: '',
     repo: '',
     apiKey: '',
     numOpenIssues: null,
@@ -14,8 +14,8 @@ class App extends Component {
     this.setState({ domain: event.target.value });
   }
 
-  handleUserChange = event => {
-    this.setState({ user: event.target.value });
+  handleOwnerChange = event => {
+    this.setState({ owner: event.target.value });
   }
 
   handleRepoChange = event => {
@@ -39,7 +39,7 @@ class App extends Component {
           }
         }`,
         variables: {
-          owner: this.state.user,
+          owner: this.state.owner,
           name: this.state.repo,
         },
       }),
@@ -58,9 +58,9 @@ class App extends Component {
           placeholder="Domain"
         />
         <input
-          value={this.state.user}
-          onChange={this.handleUserChange}
-          placeholder="User"
+          value={this.state.owner}
+          onChange={this.handleOwnerChange}
+          placeholder="Repo owner"
         />
         <input
           value={this.state.repo}
@@ -70,12 +70,12 @@ class App extends Component {
         <input
           value={this.state.apiKey}
           onChange={this.handleApiKeyChange}
-          placeholder="API Key"
+          placeholder="API key"
         />
         <button onClick={this.fetchIssues}>Submit</button>
         {this.state.numOpenIssues && (
           <div>
-            {this.state.user}/{this.state.repo} has {this.state.numOpenIssues} open issues
+            {this.state.owner}/{this.state.repo} has {this.state.numOpenIssues} open issues
           </div>
         )}
       </div>
