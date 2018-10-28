@@ -27,28 +27,25 @@ class App extends Component {
       fetchAllIssues(githubOptions),
     ]);
 
-    // Calculate open issues by date
-    // TODO: come up with a better way of formatting the chart data
+    // Get all the unique times with data
     const times = [...new Set([
       ...issues.map(issue => issue.createdAt),
       ...issues.filter(issue => issue.closedAt).map(issue => issue.closedAt),
     ])];
     times.sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
-    const numIssuesByDate = times.map(date => ({
-      x: date,
-      y: issues.filter(issue => new Date(date) >= new Date(issue.createdAt)).length,
+
+    // For each time, get the open issues during that time
+    const openIssuesByTime = times.map(time => ({
+      t: time,
+      y: issues.filter(issue => (
+        new Date(issue.createdAt) <= new Date(time) && // issue is open
+        (!issue.closedAt || new Date(time) < new Date(issue.closedAt)) // issue is not closed yet
+      )).length,
     }));
-    issues.filter(issue => issue.closedAt).forEach(closedIssue => {
-      numIssuesByDate.forEach(point => {
-        if (new Date(closedIssue.closedAt) < new Date(point.x)) {
-          point.y -= 1;
-        }
-      });
-    });
-    const offset = numOpenIssues - numIssuesByDate[numIssuesByDate.length - 1].y;
-    numIssuesByDate.forEach(point => {
-      point.y += offset; // since we can't always get all the issues, add vertical offset
-    });
+
+    // Since we can't get all the issues, apply an offset to normalize the values
+    const offset = numOpenIssues - openIssuesByTime[openIssuesByTime.length - 1].y;
+    openIssuesByTime.forEach(point => { point.y += offset });
 
     const chartData = {
       datasets: [
@@ -59,7 +56,7 @@ class App extends Component {
           pointBorderColor: 'rgba(75,192,192,1)',
           pointRadius: 1,
           pointHoverRadius: 1,
-          data: numIssuesByDate,
+          data: openIssuesByTime,
         },
       ],
     };
