@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Scatter } from 'react-chartjs-2';
-import { fetchNumOpenIssues, fetchIssues } from './util/github-util';
+import { fetchNumOpenIssues, fetchIssues, fetchLabels } from './util/github-util';
 import './App.css';
 
 class App extends Component {
@@ -22,9 +22,10 @@ class App extends Component {
   generateChart = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
-    const [numOpenIssues, issues] = await Promise.all([
+    const [numOpenIssues, issues, labels] = await Promise.all([
       fetchNumOpenIssues(githubOptions),
       fetchIssues(githubOptions),
+      fetchLabels(githubOptions),
     ]);
 
     // Since we can't get all the issues, calculate an offset to normalize the values
