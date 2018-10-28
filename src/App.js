@@ -5,7 +5,7 @@ import './App.css';
 
 class App extends Component {
   state = {
-    repoURL: '',
+    repoURL: 'https://github.com/facebook/create-react-app',
     apiKey: '',
     numOpenIssues: null,
     chartData: null,
