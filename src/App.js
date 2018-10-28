@@ -34,7 +34,22 @@ class App extends Component {
       name: this.state.repoName,
       apiKey: this.state.apiKey,
     });
-    console.log(issues);
+
+    // Remove time portion in issue dates
+    const formattedIssues = issues.map(issue => ({
+      ...issue,
+      createdAt: new Date(issue.createdAt).toDateString(),
+      closedAt: issue.closedAt && new Date(issue.closedAt).toDateString(),
+    }));
+
+    // Get number of issues by date
+    const numIssuesByDate = [...new Set(formattedIssues.map(issue => issue.createdAt))]
+      .map(date => ({
+        x: new Date(date),
+        y: formattedIssues.filter(issue => new Date(date) >= new Date(issue.createdAt)).length,
+      }));
+
+    console.log(numIssuesByDate);
   }
 
   render() {
