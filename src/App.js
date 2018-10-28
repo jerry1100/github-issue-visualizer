@@ -28,11 +28,9 @@ class App extends Component {
     ]);
 
     // Get all the unique times with data
-    const times = [...new Set([
-      ...issues.map(issue => issue.createdAt),
-      ...issues.filter(issue => issue.closedAt).map(issue => issue.closedAt),
-    ])];
-    times.sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
+    const times = Array.from(new Set(issues.reduce((total, issue) => (
+      total.concat(issue.createdAt, issue.closedAt || [])
+    ), []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
 
     // For each time, get the open issues during that time
     const openIssuesByTime = times.map(time => ({
