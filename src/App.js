@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Scatter } from 'react-chartjs-2';
-import { fetchNumOpenIssues, fetchAllIssues } from './util/github-util';
+import { fetchNumOpenIssues, fetchIssues } from './util/github-util';
 import './App.css';
 
 class App extends Component {
@@ -19,12 +19,12 @@ class App extends Component {
     this.setState({ apiKey: event.target.value });
   }
 
-  fetchIssues = async () => {
+  generateChart = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
     const [numOpenIssues, issues] = await Promise.all([
       fetchNumOpenIssues(githubOptions),
-      fetchAllIssues(githubOptions),
+      fetchIssues(githubOptions),
     ]);
 
     // Since we can't get all the issues, calculate an offset to normalize the values
@@ -77,7 +77,7 @@ class App extends Component {
           onChange={this.handleApiKeyChange}
           placeholder="API key"
         />
-        <button onClick={this.fetchIssues}>Submit</button>
+        <button onClick={this.generateChart}>Submit</button>
         {this.state.numOpenIssues && (
           <div>
             {this.state.repoOwner}/{this.state.repoName} has {this.state.numOpenIssues} open issues

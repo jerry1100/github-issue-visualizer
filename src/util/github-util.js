@@ -24,7 +24,11 @@ export async function fetchNumOpenIssues(options) {
   return response.data.repository.issues.totalCount;
 }
 
-export async function fetchAllIssues(options) {
+/**
+ * Recursively fetches a repository's issues
+ * @param {object} options Request options
+ */
+export async function fetchIssues(options) {
   if (options.maxRequests === undefined) {
     options.maxRequests = 3;
   }
@@ -69,7 +73,7 @@ export async function fetchAllIssues(options) {
     return nodes;
   }
 
-  return (await fetchAllIssues({
+  return (await fetchIssues({
     ...options,
     before: pageInfo.startCursor,
     maxRequests: options.maxRequests - 1,
