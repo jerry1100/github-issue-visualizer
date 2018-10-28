@@ -92,6 +92,10 @@ class App extends Component {
           <Scatter
             data={this.state.chartData}
             options={{
+              tooltips: {
+                intersect: false,
+                mode: 'index',
+              },
               scales: {
                 xAxes: [{
                   type: 'time',
