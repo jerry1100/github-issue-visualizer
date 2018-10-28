@@ -5,24 +5,14 @@ import './App.css';
 
 class App extends Component {
   state = {
-    repoDomain: '',
-    repoOwner: '',
-    repoName: '',
+    repoURL: '',
     apiKey: '',
     numOpenIssues: null,
     chartData: null,
   }
 
-  handleDomainChange = event => {
-    this.setState({ repoDomain: event.target.value });
-  }
-
-  handleOwnerChange = event => {
-    this.setState({ repoOwner: event.target.value });
-  }
-
-  handleNameChange = event => {
-    this.setState({ repoName: event.target.value });
+  handleRepoURLChange = event => {
+    this.setState({ repoURL: event.target.value });
   }
 
   handleApiKeyChange = event => {
@@ -30,12 +20,8 @@ class App extends Component {
   }
 
   fetchIssues = async () => {
-    const githubOptions = {
-      domain: this.state.repoDomain,
-      owner: this.state.repoOwner,
-      name: this.state.repoName,
-      apiKey: this.state.apiKey,
-    };
+    const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
+    const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
     const [numOpenIssues, issues] = await Promise.all([
       fetchNumOpenIssues(githubOptions),
       fetchAllIssues(githubOptions),
@@ -83,26 +69,16 @@ class App extends Component {
       ],
     };
 
-    this.setState({ chartData });
+    this.setState({ repoURL: `https://${repoURL}`, chartData });
   }
 
   render() {
     return (
       <div className="App">
         <input
-          value={this.state.repoDomain}
-          onChange={this.handleDomainChange}
-          placeholder="Domain"
-        />
-        <input
-          value={this.state.repoOwner}
-          onChange={this.handleOwnerChange}
-          placeholder="Repo owner"
-        />
-        <input
-          value={this.state.repoName}
-          onChange={this.handleNameChange}
-          placeholder="Repo name"
+          value={this.state.repoURL}
+          onChange={this.handleRepoURLChange}
+          placeholder="Repo URL"
         />
         <input
           value={this.state.apiKey}
