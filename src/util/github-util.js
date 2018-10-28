@@ -1,3 +1,29 @@
+export async function fetchNumOpenIssues(options) {
+  const response = await fetch(`https://api.${options.domain}/graphql`, {
+    method: 'post',
+    headers: { 'Authorization': `Basic ${window.btoa(options.apiKey)}` },
+    body: JSON.stringify({
+      query: `query($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name, ) {
+          issues(states: OPEN) {
+            totalCount
+          }
+        }
+      }`,
+      variables: {
+        owner: options.owner,
+        name: options.name,
+      },
+    }),
+  }).then(response => response.json());
+
+  if (!response.data) {
+    throw Error(response);
+  }
+
+  return response.data.repository.issues.totalCount;
+}
+
 export async function fetchAllIssues(options) {
   if (options.maxRequests === undefined) {
     options.maxRequests = 5;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Scatter } from 'react-chartjs-2';
-import { fetchAllIssues } from './util/github-util';
+import { fetchNumOpenIssues, fetchAllIssues } from './util/github-util';
 import './App.css';
 
 class App extends Component {
@@ -30,12 +30,16 @@ class App extends Component {
   }
 
   fetchIssues = async () => {
-    const issues = await fetchAllIssues({
+    const githubOptions = {
       domain: this.state.repoDomain,
       owner: this.state.repoOwner,
       name: this.state.repoName,
       apiKey: this.state.apiKey,
-    });
+    };
+    const [numOpenIssues, issues] = await Promise.all([
+      fetchNumOpenIssues(githubOptions),
+      fetchAllIssues(githubOptions),
+    ]);
 
     // Calculate open issues by date
     // TODO: come up with more efficient way of doing this
@@ -54,7 +58,10 @@ class App extends Component {
         }
       });
     });
-    console.log(numIssuesByDate);
+    const offset = numOpenIssues - numIssuesByDate[numIssuesByDate.length - 1].y;
+    numIssuesByDate.forEach(point => {
+      point.y += offset; // since we can't always get all the issues, add vertical offset
+    });
 
     const chartData = {
       datasets: [
