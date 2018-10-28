@@ -37,13 +37,23 @@ class App extends Component {
       apiKey: this.state.apiKey,
     });
 
-    // Get number of issues by date
-    const numIssuesByDate = [...new Set(issues.map(issue => issue.createdAt))]
+    // Calculate open issues by date
+    // TODO: come up with more efficient way of doing this
+    const numIssuesByDate = [
+      ...new Set(issues.map(issue => issue.createdAt)), // get unique dates
+      new Date().toISOString(), // end with current date so we don't cut off any points
+    ]
       .map(date => ({
         x: date,
         y: issues.filter(issue => new Date(date) >= new Date(issue.createdAt)).length,
       }));
-
+    issues.filter(issue => issue.closedAt).forEach(closedIssue => {
+      numIssuesByDate.forEach(point => {
+        if (new Date(closedIssue.closedAt) < new Date(point.x)) {
+          point.y -= 1;
+        }
+      });
+    });
     console.log(numIssuesByDate);
 
     const chartData = {
