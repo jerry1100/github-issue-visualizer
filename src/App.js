@@ -28,15 +28,16 @@ class App extends Component {
     ]);
 
     // Calculate open issues by date
-    // TODO: come up with more efficient way of doing this
-    const numIssuesByDate = [
-      ...new Set(issues.map(issue => issue.createdAt)), // get unique dates
-      new Date().toISOString(), // end with current date so we don't cut off any points
-    ]
-      .map(date => ({
-        x: date,
-        y: issues.filter(issue => new Date(date) >= new Date(issue.createdAt)).length,
-      }));
+    // TODO: come up with a better way of formatting the chart data
+    const times = [...new Set([
+      ...issues.map(issue => issue.createdAt),
+      ...issues.filter(issue => issue.closedAt).map(issue => issue.closedAt),
+    ])];
+    times.sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
+    const numIssuesByDate = times.map(date => ({
+      x: date,
+      y: issues.filter(issue => new Date(date) >= new Date(issue.createdAt)).length,
+    }));
     issues.filter(issue => issue.closedAt).forEach(closedIssue => {
       numIssuesByDate.forEach(point => {
         if (new Date(closedIssue.closedAt) < new Date(point.x)) {
