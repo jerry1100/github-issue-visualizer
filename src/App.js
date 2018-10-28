@@ -4,23 +4,23 @@ import './App.css';
 
 class App extends Component {
   state = {
-    domain: '',
-    owner: '',
-    repo: '',
+    repoDomain: '',
+    repoOwner: '',
+    repoName: '',
     apiKey: '',
     numOpenIssues: null,
   }
 
   handleDomainChange = event => {
-    this.setState({ domain: event.target.value });
+    this.setState({ repoDomain: event.target.value });
   }
 
   handleOwnerChange = event => {
-    this.setState({ owner: event.target.value });
+    this.setState({ repoOwner: event.target.value });
   }
 
-  handleRepoChange = event => {
-    this.setState({ repo: event.target.value });
+  handleNameChange = event => {
+    this.setState({ repoName: event.target.value });
   }
 
   handleApiKeyChange = event => {
@@ -29,9 +29,9 @@ class App extends Component {
 
   fetchIssues = async () => {
     const issues = await fetchAllIssues({
-      domain: this.state.domain,
-      owner: this.state.owner,
-      repo: this.state.repo,
+      domain: this.state.repoDomain,
+      owner: this.state.repoOwner,
+      name: this.state.repoName,
       apiKey: this.state.apiKey,
     });
     console.log(issues);
@@ -41,19 +41,19 @@ class App extends Component {
     return (
       <div className="App">
         <input
-          value={this.state.domain}
+          value={this.state.repoDomain}
           onChange={this.handleDomainChange}
           placeholder="Domain"
         />
         <input
-          value={this.state.owner}
+          value={this.state.repoOwner}
           onChange={this.handleOwnerChange}
           placeholder="Repo owner"
         />
         <input
-          value={this.state.repo}
-          onChange={this.handleRepoChange}
-          placeholder="Repo"
+          value={this.state.repoName}
+          onChange={this.handleNameChange}
+          placeholder="Repo name"
         />
         <input
           value={this.state.apiKey}
@@ -63,7 +63,7 @@ class App extends Component {
         <button onClick={this.fetchIssues}>Submit</button>
         {this.state.numOpenIssues && (
           <div>
-            {this.state.owner}/{this.state.repo} has {this.state.numOpenIssues} open issues
+            {this.state.repoOwner}/{this.state.repoName} has {this.state.numOpenIssues} open issues
           </div>
         )}
       </div>

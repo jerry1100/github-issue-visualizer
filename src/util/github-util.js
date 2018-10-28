@@ -19,7 +19,7 @@ export async function fetchAllIssues(options) {
       }`,
       variables: {
         owner: options.owner,
-        name: options.repo,
+        name: options.name,
         after: options.after,
       },
     }),
