@@ -30,7 +30,6 @@ export async function fetchAllIssues(options) {
   }
 
   if (!options.maxRequests) {
-    console.log('Reached maximum number of requests');
     return [];
   }
 
