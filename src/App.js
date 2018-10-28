@@ -5,8 +5,8 @@ import './App.css';
 
 class App extends Component {
   state = {
-    repoURL: 'https://github.com/facebook/create-react-app',
-    apiKey: '',
+    repoURL: window.localStorage.getItem('repo_url') || '',
+    apiKey: window.localStorage.getItem('api_key') || '',
     numOpenIssues: null,
     chartData: null,
   }
@@ -63,7 +63,10 @@ class App extends Component {
       ],
     };
 
-    this.setState({ repoURL: `https://${repoURL}`, chartData });
+    this.setState({ repoURL: `https://${repoURL}`, chartData }, () => {
+      window.localStorage.setItem('repo_url', this.state.repoURL);
+      window.localStorage.setItem('api_key', this.state.apiKey);
+    });
   }
 
   render() {

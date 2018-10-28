@@ -26,7 +26,7 @@ export async function fetchNumOpenIssues(options) {
 
 export async function fetchAllIssues(options) {
   if (options.maxRequests === undefined) {
-    options.maxRequests = 5;
+    options.maxRequests = 3;
   }
 
   if (!options.maxRequests) {
