@@ -27,6 +27,9 @@ class App extends Component {
       fetchAllIssues(githubOptions),
     ]);
 
+    // Since we can't get all the issues, calculate an offset to normalize the values
+    const offset = numOpenIssues - issues.filter(issue => !issue.closedAt).length;
+
     // Get all the unique times with data
     const times = Array.from(new Set(issues.reduce((total, issue) => (
       total.concat(issue.createdAt, issue.closedAt || [])
@@ -35,15 +38,11 @@ class App extends Component {
     // For each time, get the open issues during that time
     const openIssuesByTime = times.map(time => ({
       t: time,
-      y: issues.filter(issue => (
+      y: offset + issues.filter(issue => (
         new Date(issue.createdAt) <= new Date(time) && // issue is open
         (!issue.closedAt || new Date(time) < new Date(issue.closedAt)) // issue is not closed yet
       )).length,
     }));
-
-    // Since we can't get all the issues, apply an offset to normalize the values
-    const offset = numOpenIssues - openIssuesByTime[openIssuesByTime.length - 1].y;
-    openIssuesByTime.forEach(point => { point.y += offset });
 
     const chartData = {
       datasets: [
