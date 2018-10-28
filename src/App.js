@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { fetchAllIssues } from './util/github-util';
 import './App.css';
 
 class App extends Component {
@@ -26,27 +27,14 @@ class App extends Component {
     this.setState({ apiKey: event.target.value });
   }
 
-  fetchIssues = () => {
-    fetch(`https://api.${this.state.domain}/graphql`, {
-      method: 'post',
-      headers: { 'Authorization': `Basic ${window.btoa(this.state.apiKey)}` },
-      body: JSON.stringify({
-        query: `query($owner: String!, $name: String!) {
-          repository(owner: $owner, name: $name) {
-            issues(states:OPEN) {
-              totalCount
-            }
-          }
-        }`,
-        variables: {
-          owner: this.state.owner,
-          name: this.state.repo,
-        },
-      }),
-    })
-      .then(response => response.json())
-      .then(({ data }) => this.setState({ numOpenIssues: data.repository.issues.totalCount }))
-      .catch(e => console.error(e));
+  fetchIssues = async () => {
+    const issues = await fetchAllIssues({
+      domain: this.state.domain,
+      owner: this.state.owner,
+      repo: this.state.repo,
+      apiKey: this.state.apiKey,
+    });
+    console.log(issues);
   }
 
   render() {
