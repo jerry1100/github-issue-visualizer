@@ -3,12 +3,12 @@ export async function fetchAllIssues(options) {
     method: 'post',
     headers: { 'Authorization': `Basic ${window.btoa(options.apiKey)}` },
     body: JSON.stringify({
-      query: `query($owner: String!, $name: String!, $after: String) {
+      query: `query($owner: String!, $name: String!, $before: String) {
         repository(owner: $owner, name: $name, ) {
-          issues(first: 100, after: $after) {
+          issues(last: 100, before: $before) {
             pageInfo {
-              hasNextPage
-              endCursor
+              hasPreviousPage
+              startCursor
             }
             nodes {
               createdAt
@@ -20,7 +20,7 @@ export async function fetchAllIssues(options) {
       variables: {
         owner: options.owner,
         name: options.name,
-        after: options.after,
+        before: options.before,
       },
     }),
   }).then(response => response.json());
@@ -31,9 +31,9 @@ export async function fetchAllIssues(options) {
 
   const { nodes, pageInfo } = response.data.repository.issues;
 
-  if (!pageInfo.hasNextPage) {
+  if (!pageInfo.hasPreviousPage) {
     return nodes;
   }
 
-  return nodes.concat(await fetchAllIssues({ ...options, after: pageInfo.endCursor }));
+  return (await fetchAllIssues({ ...options, before: pageInfo.startCursor })).concat(nodes);
 }
