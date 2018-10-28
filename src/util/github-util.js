@@ -1,4 +1,13 @@
 export async function fetchAllIssues(options) {
+  if (options.maxRequests === undefined) {
+    options.maxRequests = 5;
+  }
+
+  if (!options.maxRequests) {
+    console.log('Reached maximum number of requests');
+    return [];
+  }
+
   const response = await fetch(`https://api.${options.domain}/graphql`, {
     method: 'post',
     headers: { 'Authorization': `Basic ${window.btoa(options.apiKey)}` },
@@ -35,5 +44,9 @@ export async function fetchAllIssues(options) {
     return nodes;
   }
 
-  return (await fetchAllIssues({ ...options, before: pageInfo.startCursor })).concat(nodes);
+  return (await fetchAllIssues({
+    ...options,
+    before: pageInfo.startCursor,
+    maxRequests: options.maxRequests - 1,
+  })).concat(nodes);
 }
