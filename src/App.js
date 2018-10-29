@@ -7,7 +7,7 @@ class App extends Component {
   state = {
     repoURL: window.localStorage.getItem('repo_url') || '',
     apiKey: window.localStorage.getItem('api_key') || '',
-    numOpenIssues: null,
+    totalOpenIssues: null,
     chartData: null,
   }
 
@@ -77,7 +77,7 @@ class App extends Component {
       }],
     };
 
-    this.setState({ repoURL: `https://${repoURL}`, chartData }, () => {
+    this.setState({ repoURL: `https://${repoURL}`, chartData, totalOpenIssues }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
       window.localStorage.setItem('api_key', this.state.apiKey);
     });
@@ -97,9 +97,9 @@ class App extends Component {
           placeholder="API key"
         />
         <button onClick={this.generateChart}>Submit</button>
-        {this.state.numOpenIssues && (
+        {this.state.totalOpenIssues && (
           <div>
-            {this.state.repoOwner}/{this.state.repoName} has {this.state.numOpenIssues} open issues
+            {this.state.repoOwner}/{this.state.repoName} has {this.state.totalOpenIssues} open issues
           </div>
         )}
         {this.state.chartData && (
