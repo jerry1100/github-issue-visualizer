@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Scatter } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import { fetchTotalOpenIssues, fetchIssues, fetchLabels } from './util/github-util';
 import './App.css';
 
@@ -67,13 +67,11 @@ class App extends Component {
 
   getChartData = () => {
     // For each selected label, generate the chart data if didn't already
-    this.state.selectedLabels.filter(label => !this.chartData[label])
-      .map(label => this.fetchedLabels.find(({ name }) => name === label))
+    this.fetchedLabels.filter(label => this.state.selectedLabels.includes(label.name))
+      .filter(label => !this.chartData[label.name])
       .forEach(label => {
-        this.labelColors[label.name] = label.color;
-        const dataPoints = this.times.map(time => ({
-          x: time,
-          y: this.fetchedIssues.filter(issue => {
+        const values = this.times.map(time => (
+          this.fetchedIssues.filter(issue => {
             if (new Date(time) < new Date(issue.createdAt)) {
               return false;
             }
@@ -84,27 +82,25 @@ class App extends Component {
               return true;
             }
             return issue.labels.nodes.some(issueLabel => issueLabel.name === label.name);
-          }).length,
-        }));
-        const offset = label.issues.totalCount - dataPoints[dataPoints.length - 1].y;
-        this.chartData[label.name] = dataPoints.map(point => ({
-          x: point.x,
-          y: point.y + offset,
-        }));
+          }).length
+        ));
+        const offset = label.issues.totalCount - values[values.length - 1];
+        this.chartData[label.name] = values.map(point => point + offset);
+        this.labelColors[label.name] = label.color;
       });
-    
-    const datasets = this.state.selectedLabels.map(label => ({
-      label,
-      data: this.chartData[label],
-      showLine: true,
-      fill: false,
-      borderColor: `#${this.labelColors[label]}`,
-      pointBorderColor: `#${this.labelColors[label]}`,
-      pointRadius: 1,
-      pointHoverRadius: 1,
-    }));
 
-    return { datasets };
+    return {
+      labels: this.times,
+      datasets: this.state.selectedLabels.map(label => ({
+        label,
+        data: this.chartData[label],
+        fill: false,
+        borderColor: `#${this.labelColors[label]}`,
+        pointBorderColor: `#${this.labelColors[label]}`,
+        pointRadius: 1,
+        pointHoverRadius: 1,
+      })),
+    };
   }
 
   render() {
@@ -141,7 +137,7 @@ class App extends Component {
           </div>
         )}
         {this.state.chartLabels && (
-          <Scatter
+          <Line
             data={this.getChartData()}
             options={{
               legend: {
