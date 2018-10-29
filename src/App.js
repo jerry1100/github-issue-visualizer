@@ -73,7 +73,7 @@ class App extends Component {
     this.setState({
       totalOpenIssues,
       repoURL: `https://${repoURL}`,
-      chartLabels: this.fetchedLabels.map(label => label.name),
+      chartLabels: this.fetchedLabels,
       selectedLabels: ['total issues'],
     }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
@@ -141,12 +141,12 @@ class App extends Component {
           <div>
             {this.state.chartLabels.map(label => (
               <option
-                className={this.state.selectedLabels.includes(label) ? 'selected' : null}
-                key={label}
-                value={label}
+                className={this.state.selectedLabels.includes(label.name) ? 'selected' : null}
+                key={label.name}
+                value={label.name}
                 onClick={this.handleLabelChange}
               >
-                {label}
+                {label.name} ({label.issues.totalCount})
               </option>
             ))}
           </div>
