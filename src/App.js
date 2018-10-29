@@ -30,14 +30,37 @@ class App extends Component {
   getIssues = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
-    const [totalOpenIssues, fetchedIssues, fetchedLabels] = await Promise.all([
+    const results = await Promise.all([
       fetchTotalOpenIssues(githubOptions),
       fetchIssues(githubOptions),
       fetchLabels(githubOptions),
     ]);
 
+    // Save data for generating charts later
+    const totalOpenIssues = results[0];
+    this.fetchedIssues = results[1]
+    this.fetchedLabels = results[2];
+    this.chartData = {};
+
+    // Don't show labels that aren't in any issues
+    this.fetchedLabels = this.fetchedLabels.filter(label => (
+      this.fetchedIssues.some(issue => (
+        issue.labels.nodes.some(({ name }) => name === label.name)
+      ))
+    ));
+
+    // Mock a "total issues" label for displaying all the issues
+    this.fetchedLabels.unshift({
+      name: 'total issues',
+      color: '0366d6',
+      issues: { totalCount: totalOpenIssues },
+    });
+    this.labelColors = this.fetchedLabels.reduce((total, label) => (
+      { ...total, [label.name]: label.color }
+    ), {});
+
     // Get all the unique times with data
-    this.times = Array.from(new Set(fetchedIssues.reduce((total, issue) => {
+    this.times = Array.from(new Set(this.fetchedIssues.reduce((total, issue) => {
       const floorHour = date => (
         new Date(new Date(new Date(date).setMilliseconds(0)).setMinutes(0))
       );
@@ -46,24 +69,11 @@ class App extends Component {
         issue.closedAt ? floorHour(issue.closedAt).toISOString() : [],
       );
     }, []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
-    
-    // Mock a "total issues" label for displaying all the issues
-    fetchedLabels.unshift({
-      name: 'total issues',
-      color: '0366d6',
-      issues: { totalCount: totalOpenIssues },
-    });
-
-    // Save data for generating charts later
-    this.fetchedIssues = fetchedIssues;
-    this.fetchedLabels = fetchedLabels;
-    this.labelColors = {};
-    this.chartData = {};
 
     this.setState({
       totalOpenIssues,
       repoURL: `https://${repoURL}`,
-      chartLabels: fetchedLabels.map(label => label.name),
+      chartLabels: this.fetchedLabels.map(label => label.name),
       selectedLabels: ['total issues'],
     }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
@@ -92,7 +102,6 @@ class App extends Component {
         ));
         const offset = label.issues.totalCount - values[values.length - 1];
         this.chartData[label.name] = values.map(point => point + offset);
-        this.labelColors[label.name] = label.color;
       });
 
     return {
