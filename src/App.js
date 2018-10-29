@@ -42,7 +42,7 @@ class App extends Component {
     this.fetchedLabels = results[2];
     this.chartData = {};
 
-    // Don't show labels that aren't in any issues
+    // Remove labels that aren't in any issues
     this.fetchedLabels = this.fetchedLabels.filter(label => (
       this.fetchedIssues.some(issue => (
         issue.labels.nodes.some(({ name }) => name === label.name)
@@ -59,16 +59,13 @@ class App extends Component {
       { ...total, [label.name]: label.color }
     ), {});
 
-    // Get all the unique times with data
-    this.times = Array.from(new Set(this.fetchedIssues.reduce((total, issue) => {
-      const floorHour = date => (
-        new Date(new Date(new Date(date).setMilliseconds(0)).setMinutes(0))
-      );
-      return total.concat(
-        floorHour(issue.createdAt).toISOString(),
-        issue.closedAt ? floorHour(issue.closedAt).toISOString() : [],
-      );
-    }, []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
+    // Get values for the time axis, floored to nearest hour and duplicates removed
+    const allTimes = this.fetchedIssues.reduce((total, issue) => (
+      total.concat(issue.createdAt, issue.closedAt || [])
+    ), []);
+    this.times = Array.from(new Set(allTimes.map(time => (
+      new Date(new Date(new Date(time).setMilliseconds(0)).setMinutes(0)).toISOString()
+    )))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
 
     this.setState({
       totalOpenIssues,
