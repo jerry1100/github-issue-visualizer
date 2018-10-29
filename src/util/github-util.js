@@ -2,7 +2,7 @@
  * Fetches the total number of open issues in the repo
  * @param {object} options Request options
  */
-export async function fetchNumOpenIssues(options) {
+export async function fetchTotalOpenIssues(options) {
   const response = await fetch(`https://api.${options.domain}/graphql`, {
     method: 'post',
     headers: { 'Authorization': `Basic ${window.btoa(options.apiKey)}` },
@@ -55,6 +55,11 @@ export async function fetchIssues(options) {
             nodes {
               createdAt
               closedAt
+              labels(first: 100) {
+                nodes {
+                  name
+                }
+              }
             }
           }
         }
@@ -102,6 +107,7 @@ export async function fetchLabels(options) {
             }
             nodes {
               name
+              color
               issues(states: OPEN) {
                 totalCount
               }

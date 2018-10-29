@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Scatter } from 'react-chartjs-2';
-import { fetchNumOpenIssues, fetchIssues, fetchLabels } from './util/github-util';
+import { fetchTotalOpenIssues, fetchIssues, fetchLabels } from './util/github-util';
 import './App.css';
 
 class App extends Component {
@@ -22,41 +22,59 @@ class App extends Component {
   generateChart = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
-    const [numOpenIssues, issues, labels] = await Promise.all([
-      fetchNumOpenIssues(githubOptions),
+    const [totalOpenIssues, issues, labels] = await Promise.all([
+      fetchTotalOpenIssues(githubOptions),
       fetchIssues(githubOptions),
       fetchLabels(githubOptions),
     ]);
-
-    // Since we can't get all the issues, calculate an offset to normalize the values
-    const offset = numOpenIssues - issues.filter(issue => !issue.closedAt).length;
 
     // Get all the unique times with data
     const times = Array.from(new Set(issues.reduce((total, issue) => (
       total.concat(issue.createdAt, issue.closedAt || [])
     ), []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
 
-    // For each time, get the open issues during that time
-    const openIssuesByTime = times.map(time => ({
-      t: time,
-      y: offset + issues.filter(issue => (
-        new Date(issue.createdAt) <= new Date(time) && // issue is open
-        (!issue.closedAt || new Date(time) < new Date(issue.closedAt)) // issue is not closed yet
-      )).length,
-    }));
+    // Mock a "total issues" label for displaying all the issues
+    labels.push({
+      name: 'total issues',
+      color: '#0366d6',
+      issues: { totalCount: totalOpenIssues },
+    });
+
+    // For each label, populate all its data points
+    const dataByLabel = {};
+    labels.forEach(label => {
+      const dataPoints = times.map(time => ({
+        x: time,
+        y: issues.filter(issue => {
+          if (new Date(time) < new Date(issue.createdAt)) {
+            return false;
+          }
+          if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
+            return false;
+          }
+          if (label.name === 'total issues') {
+            return true;
+          }
+          return issue.labels.nodes.some(issueLabel => issueLabel.name === label.name);
+        }).length,
+      }));
+      const offset = label.issues.totalCount - dataPoints[dataPoints.length - 1].y;
+      dataByLabel[label.name] = dataPoints.map(point => ({
+        x: point.x,
+        y: point.y + offset,
+      }));
+    });
 
     const chartData = {
-      datasets: [
-        {
-          label: 'Open Issues by Date',
-          showLine: true,
-          backgroundColor: 'rgba(75,192,192,0.4)',
-          pointBorderColor: 'rgba(75,192,192,1)',
-          pointRadius: 1,
-          pointHoverRadius: 1,
-          data: openIssuesByTime,
-        },
-      ],
+      datasets: [{
+        label: 'total issues',
+        data: dataByLabel['total issues'],
+        showLine: true,
+        backgroundColor: 'rgba(75, 192, 192, 0.4)',
+        pointBorderColor: 'rgba(75, 192, 192, 1)',
+        pointRadius: 1,
+        pointHoverRadius: 1,
+      }],
     };
 
     this.setState({ repoURL: `https://${repoURL}`, chartData }, () => {
