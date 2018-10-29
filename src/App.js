@@ -62,7 +62,7 @@ class App extends Component {
     // Get values for the time axis, floored to nearest hour and duplicates removed
     const allTimes = this.fetchedIssues.reduce((total, issue) => (
       total.concat(issue.createdAt, issue.closedAt || [])
-    ), []);
+    ), [new Date()]); // include current time
     this.times = Array.from(new Set(allTimes.map(time => (
       new Date(new Date(new Date(time).setMilliseconds(0)).setMinutes(0)).toISOString()
     )))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
