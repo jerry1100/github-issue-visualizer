@@ -43,7 +43,7 @@ class App extends Component {
     ), []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
 
     // Mock a "total issues" label for displaying all the issues
-    labels.push({
+    labels.unshift({
       name: 'total issues',
       color: '#0366d6',
       issues: { totalCount: totalOpenIssues },
