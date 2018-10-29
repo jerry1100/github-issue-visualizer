@@ -1,3 +1,13 @@
 .App {
   text-align: center;
 }
+
+option:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+option.selected {
+  cursor: pointer;
+  background: #accef7;
+}

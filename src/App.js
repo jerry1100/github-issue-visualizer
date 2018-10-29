@@ -9,6 +9,9 @@ class App extends Component {
     apiKey: window.localStorage.getItem('api_key') || '',
     totalOpenIssues: null,
     chartData: null,
+    chartLabels: null,
+    selectedLabels: [],
+    openDatasets: [],
   }
 
   handleRepoURLChange = event => {
@@ -17,6 +20,13 @@ class App extends Component {
 
   handleApiKeyChange = event => {
     this.setState({ apiKey: event.target.value });
+  }
+
+  handleLabelChange = event => {
+    const selectedLabels = this.state.selectedLabels.includes(event.target.value)
+      ? this.state.selectedLabels.filter(label => label !== event.target.value)
+      : this.state.selectedLabels.concat(event.target.value);
+    this.setState({ selectedLabels });
   }
 
   generateChart = async () => {
@@ -77,7 +87,9 @@ class App extends Component {
       }],
     };
 
-    this.setState({ repoURL: `https://${repoURL}`, chartData, totalOpenIssues }, () => {
+    const chartLabels = labels.map(label => label.name);
+
+    this.setState({ repoURL: `https://${repoURL}`, chartData, chartLabels, totalOpenIssues }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
       window.localStorage.setItem('api_key', this.state.apiKey);
     });
@@ -100,6 +112,20 @@ class App extends Component {
         {this.state.totalOpenIssues && (
           <div>
             {this.state.repoURL} has {this.state.totalOpenIssues} open issues
+          </div>
+        )}
+        {this.state.chartLabels && (
+          <div>
+            {this.state.chartLabels.map(label => (
+              <option
+                className={this.state.selectedLabels.includes(label) ? 'selected' : null}
+                key={label}
+                value={label}
+                onClick={this.handleLabelChange}
+              >
+                {label}
+              </option>
+            ))}
           </div>
         )}
         {this.state.chartData && (
