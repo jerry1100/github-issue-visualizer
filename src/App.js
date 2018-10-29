@@ -132,6 +132,9 @@ class App extends Component {
           <Scatter
             data={this.state.chartData}
             options={{
+              legend: {
+                display: false,
+              },
               tooltips: {
                 intersect: false,
                 mode: 'index',
