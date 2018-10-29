@@ -11,7 +11,6 @@ class App extends Component {
     chartData: null,
     chartLabels: null,
     selectedLabels: [],
-    openDatasets: [],
   }
 
   handleRepoURLChange = event => {
