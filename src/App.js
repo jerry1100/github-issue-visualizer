@@ -37,10 +37,16 @@ class App extends Component {
     ]);
 
     // Get all the unique times with data
-    this.times = Array.from(new Set(fetchedIssues.reduce((total, issue) => (
-      total.concat(issue.createdAt, issue.closedAt || [])
-    ), []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
-
+    this.times = Array.from(new Set(fetchedIssues.reduce((total, issue) => {
+      const floorHour = date => (
+        new Date(new Date(new Date(date).setMilliseconds(0)).setMinutes(0))
+      );
+      return total.concat(
+        floorHour(issue.createdAt).toISOString(),
+        issue.closedAt ? floorHour(issue.closedAt).toISOString() : [],
+      );
+    }, []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
+    
     // Mock a "total issues" label for displaying all the issues
     fetchedLabels.unshift({
       name: 'total issues',
@@ -95,6 +101,7 @@ class App extends Component {
         label,
         data: this.chartData[label],
         fill: false,
+        lineTension: 0,
         borderColor: `#${this.labelColors[label]}`,
         pointBorderColor: `#${this.labelColors[label]}`,
         pointRadius: 1,
@@ -152,7 +159,7 @@ class App extends Component {
                   type: 'time',
                   time: {
                     unit: 'day',
-                    tooltipFormat: 'lll' // https://momentjs.com/
+                    tooltipFormat: 'lll', // https://momentjs.com/
                   },
                 }],
               }
