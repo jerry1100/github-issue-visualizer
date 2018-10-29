@@ -73,7 +73,7 @@ class App extends Component {
     this.setState({
       totalOpenIssues,
       repoURL: `https://${repoURL}`,
-      chartLabels: this.fetchedLabels,
+      chartLabels: this.fetchedLabels.sort((a, b) => b.issues.totalCount - a.issues.totalCount),
       selectedLabels: ['total issues'],
     }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
