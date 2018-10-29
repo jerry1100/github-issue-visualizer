@@ -101,11 +101,10 @@ class App extends Component {
         label,
         data: this.chartData[label],
         fill: false,
-        lineTension: 0,
         borderColor: `#${this.labelColors[label]}`,
-        pointBorderColor: `#${this.labelColors[label]}`,
-        pointRadius: 1,
-        pointHoverRadius: 1,
+        lineTension: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
       })),
     };
   }
