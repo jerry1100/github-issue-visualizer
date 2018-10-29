@@ -8,7 +8,6 @@ class App extends Component {
     repoURL: window.localStorage.getItem('repo_url') || '',
     apiKey: window.localStorage.getItem('api_key') || '',
     totalOpenIssues: null,
-    chartData: null,
     chartLabels: null,
     selectedLabels: [],
   }
@@ -28,70 +27,84 @@ class App extends Component {
     this.setState({ selectedLabels });
   }
 
-  generateChart = async () => {
+  getIssues = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
-    const [totalOpenIssues, issues, labels] = await Promise.all([
+    const [totalOpenIssues, fetchedIssues, fetchedLabels] = await Promise.all([
       fetchTotalOpenIssues(githubOptions),
       fetchIssues(githubOptions),
       fetchLabels(githubOptions),
     ]);
 
     // Get all the unique times with data
-    const times = Array.from(new Set(issues.reduce((total, issue) => (
+    this.times = Array.from(new Set(fetchedIssues.reduce((total, issue) => (
       total.concat(issue.createdAt, issue.closedAt || [])
     ), []))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
 
     // Mock a "total issues" label for displaying all the issues
-    labels.unshift({
+    fetchedLabels.unshift({
       name: 'total issues',
-      color: '#0366d6',
+      color: '0366d6',
       issues: { totalCount: totalOpenIssues },
     });
 
-    // For each label, populate all its data points
-    const dataByLabel = {};
-    labels.forEach(label => {
-      const dataPoints = times.map(time => ({
-        x: time,
-        y: issues.filter(issue => {
-          if (new Date(time) < new Date(issue.createdAt)) {
-            return false;
-          }
-          if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
-            return false;
-          }
-          if (label.name === 'total issues') {
-            return true;
-          }
-          return issue.labels.nodes.some(issueLabel => issueLabel.name === label.name);
-        }).length,
-      }));
-      const offset = label.issues.totalCount - dataPoints[dataPoints.length - 1].y;
-      dataByLabel[label.name] = dataPoints.map(point => ({
-        x: point.x,
-        y: point.y + offset,
-      }));
-    });
+    // Save data for generating charts later
+    this.fetchedIssues = fetchedIssues;
+    this.fetchedLabels = fetchedLabels;
+    this.labelColors = {};
+    this.chartData = {};
 
-    const chartData = {
-      datasets: [{
-        label: 'total issues',
-        data: dataByLabel['total issues'],
-        showLine: true,
-        backgroundColor: 'rgba(75, 192, 192, 0.4)',
-        pointBorderColor: 'rgba(75, 192, 192, 1)',
-        pointRadius: 1,
-        pointHoverRadius: 1,
-      }],
-    };
-
-    const chartLabels = labels.map(label => label.name);
-
-    this.setState({ repoURL: `https://${repoURL}`, chartData, chartLabels, totalOpenIssues }, () => {
+    this.setState({
+      totalOpenIssues,
+      repoURL: `https://${repoURL}`,
+      chartLabels: fetchedLabels.map(label => label.name),
+      selectedLabels: ['total issues'],
+    }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
       window.localStorage.setItem('api_key', this.state.apiKey);
     });
+  }
+
+  getChartData = () => {
+    // For each selected label, generate the chart data if didn't already
+    this.state.selectedLabels.filter(label => !this.chartData[label])
+      .map(label => this.fetchedLabels.find(({ name }) => name === label))
+      .forEach(label => {
+        this.labelColors[label.name] = label.color;
+        const dataPoints = this.times.map(time => ({
+          x: time,
+          y: this.fetchedIssues.filter(issue => {
+            if (new Date(time) < new Date(issue.createdAt)) {
+              return false;
+            }
+            if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
+              return false;
+            }
+            if (label.name === 'total issues') {
+              return true;
+            }
+            return issue.labels.nodes.some(issueLabel => issueLabel.name === label.name);
+          }).length,
+        }));
+        const offset = label.issues.totalCount - dataPoints[dataPoints.length - 1].y;
+        this.chartData[label.name] = dataPoints.map(point => ({
+          x: point.x,
+          y: point.y + offset,
+        }));
+      });
+    
+    const datasets = this.state.selectedLabels.map(label => ({
+      label,
+      data: this.chartData[label],
+      showLine: true,
+      fill: false,
+      borderColor: `#${this.labelColors[label]}`,
+      pointBorderColor: `#${this.labelColors[label]}`,
+      pointRadius: 1,
+      pointHoverRadius: 1,
+    }));
+
+    return { datasets };
   }
 
   render() {
@@ -107,10 +120,10 @@ class App extends Component {
           onChange={this.handleApiKeyChange}
           placeholder="API key"
         />
-        <button onClick={this.generateChart}>Submit</button>
+        <button onClick={this.getIssues}>Submit</button>
         {this.state.totalOpenIssues && (
           <div>
-            {this.state.repoURL} has {this.state.totalOpenIssues} open issues
+            There are {this.state.totalOpenIssues} open issues
           </div>
         )}
         {this.state.chartLabels && (
@@ -127,9 +140,9 @@ class App extends Component {
             ))}
           </div>
         )}
-        {this.state.chartData && (
+        {this.state.chartLabels && (
           <Scatter
-            data={this.state.chartData}
+            data={this.getChartData()}
             options={{
               legend: {
                 display: false,
