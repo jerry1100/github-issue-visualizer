@@ -99,7 +99,7 @@ class App extends Component {
         <button onClick={this.generateChart}>Submit</button>
         {this.state.totalOpenIssues && (
           <div>
-            {this.state.repoOwner}/{this.state.repoName} has {this.state.totalOpenIssues} open issues
+            {this.state.repoURL} has {this.state.totalOpenIssues} open issues
           </div>
         )}
         {this.state.chartData && (
