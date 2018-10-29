@@ -50,7 +50,7 @@ class App extends Component {
     ));
 
     // Mock a "total issues" label for displaying all the issues
-    this.fetchedLabels.unshift({
+    this.fetchedLabels.push({
       name: 'total issues',
       color: '0366d6',
       issues: { totalCount: totalOpenIssues },
