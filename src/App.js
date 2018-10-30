@@ -80,8 +80,8 @@ class App extends Component {
 
   getChartData = () => {
     // For each selected label, generate the chart data if didn't already
-    this.fetchedLabels.filter(label => this.state.selectedLabels.includes(label.name))
-      .filter(label => !this.chartData[label.name])
+    this.state.selectedLabels.filter(label => !this.chartData[label])
+      .map(label => this.fetchedLabels.find(({ name }) => name === label))
       .forEach(label => {
         const values = this.times.map(time => (
           this.fetchedIssues.filter(issue => {
