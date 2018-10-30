@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Line } from 'react-chartjs-2';
 import { fetchTotalOpenIssues, fetchIssues, fetchLabels } from './util/github-util';
 import './App.css';
@@ -135,41 +135,41 @@ class App extends Component {
           </div>
         )}
         {this.state.chartLabels && (
-          <div>
-            {this.state.chartLabels.map(label => (
-              <option
-                className={this.state.selectedLabels.includes(label.name) ? 'selected' : null}
-                key={label.name}
-                value={label.name}
-                onClick={this.handleLabelChange}
-              >
-                {label.name} ({label.issues.totalCount})
+          <Fragment>
+            <div>
+              {this.state.chartLabels.map(label => (
+                <option
+                  className={this.state.selectedLabels.includes(label.name) ? 'selected' : null}
+                  key={label.name}
+                  value={label.name}
+                  onClick={this.handleLabelChange}
+                >
+                  {label.name} ({label.issues.totalCount})
               </option>
-            ))}
-          </div>
-        )}
-        {this.state.chartLabels && (
-          <Line
-            data={this.getChartData()}
-            options={{
-              legend: {
-                display: false,
-              },
-              tooltips: {
-                intersect: false,
-                mode: 'index',
-              },
-              scales: {
-                xAxes: [{
-                  type: 'time',
-                  time: {
-                    unit: 'day',
-                    tooltipFormat: 'lll', // https://momentjs.com/
-                  },
-                }],
-              }
-            }}
-          />
+              ))}
+            </div>
+            <Line
+              data={this.getChartData()}
+              options={{
+                legend: {
+                  display: false,
+                },
+                tooltips: {
+                  intersect: false,
+                  mode: 'index',
+                },
+                scales: {
+                  xAxes: [{
+                    type: 'time',
+                    time: {
+                      unit: 'day',
+                      tooltipFormat: 'lll', // https://momentjs.com/
+                    },
+                  }],
+                }
+              }}
+            />
+          </Fragment>
         )}
       </div>
     );
