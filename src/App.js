@@ -10,6 +10,7 @@ class App extends Component {
     totalOpenIssues: null,
     chartLabels: null,
     selectedLabels: [],
+    isCheckboxChecked: false,
   }
 
   handleRepoURLChange = event => {
@@ -25,6 +26,10 @@ class App extends Component {
       ? this.state.selectedLabels.filter(label => label !== event.target.value)
       : this.state.selectedLabels.concat(event.target.value);
     this.setState({ selectedLabels });
+  }
+
+  handleCheckboxChange = event => {
+    this.setState({ isCheckboxChecked: event.target.checked });
   }
 
   getIssues = async () => {
@@ -79,6 +84,34 @@ class App extends Component {
   }
 
   getChartData = () => {
+    // If using AND filtering, count all the issues with the selected labels
+    if (this.state.isCheckboxChecked) {
+      return {
+        labels: this.times,
+        datasets: [{
+          label: this.state.selectedLabels.join(', '),
+          fill: false,
+          borderColor: '#0366d6',
+          lineTension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          data: this.times.map(time => (
+            this.fetchedIssues.filter(issue => {
+              if (new Date(time) < new Date(issue.createdAt)) {
+                return false;
+              }
+              if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
+                return false;
+              }
+              return this.state.selectedLabels.every(label => (
+                issue.labels.nodes.some(({ name }) => name === label)
+              ));
+            }).length
+          )),
+        }],
+      };
+    }
+
     // For each selected label, generate the chart data if didn't already
     this.state.selectedLabels.filter(label => !this.chartData[label])
       .map(label => this.fetchedLabels.find(({ name }) => name === label))
@@ -136,6 +169,11 @@ class App extends Component {
         )}
         {this.state.chartLabels && (
           <Fragment>
+            <input
+              type="checkbox"
+              checked={this.state.isCheckboxChecked}
+              onChange={this.handleCheckboxChange}
+            />AND filter
             <div>
               {this.state.chartLabels.map(label => (
                 <option
