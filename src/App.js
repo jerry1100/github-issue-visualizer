@@ -55,7 +55,7 @@ class App extends Component {
     ));
 
     // Mock a "total issues" label for displaying all the issues
-    this.fetchedLabels.push({
+    this.fetchedLabels.unshift({
       name: 'total issues',
       color: '0366d6',
       issues: { totalCount: totalOpenIssues },
@@ -75,7 +75,7 @@ class App extends Component {
     this.setState({
       totalOpenIssues,
       repoURL: `https://${repoURL}`,
-      chartLabels: this.fetchedLabels.sort((a, b) => b.issues.totalCount - a.issues.totalCount),
+      chartLabels: [...this.fetchedLabels],
       selectedLabels: ['total issues'],
     }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
