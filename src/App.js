@@ -34,7 +34,7 @@ class App extends Component {
 
   getIssues = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
-    const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
+    const githubOptions = { domain, owner, name, apiKey: this.state.apiKey, maxRequests: 1 };
     const results = await Promise.all([
       fetchTotalOpenIssues(githubOptions),
       fetchIssues(githubOptions),
