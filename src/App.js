@@ -64,13 +64,16 @@ class App extends Component {
       { ...total, [label.name]: label.color }
     ), {});
 
-    // Get values for the time axis, floored to nearest hour and duplicates removed
+    // Extract createdAt/closedAt times from issues
     const allTimes = this.fetchedIssues.reduce((total, issue) => (
       total.concat(issue.createdAt, issue.closedAt || [])
-    ), [new Date()]); // include current time
+    ), []);
+
+    // Round times to nearest day, remove duplicates, and sort chronologically
     this.times = Array.from(new Set(allTimes.map(time => (
-      new Date(new Date(new Date(time).setMilliseconds(0)).setMinutes(0)).toISOString()
-    )))).sort((a, b) => new Date(a) - new Date(b)); // sort chronologically
+      new Date(new Date(time).toDateString()).toISOString()
+    )))).concat(new Date().toISOString()); // include current time
+    this.times.sort((a, b) => new Date(a) - new Date(b));
 
     this.setState({
       totalOpenIssues,
