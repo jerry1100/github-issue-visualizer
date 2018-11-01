@@ -60,6 +60,8 @@ class App extends Component {
       color: '0366d6',
       issues: { totalCount: totalOpenIssues },
     });
+
+    // Save the label colors to use as the line colors
     this.labelColors = this.fetchedLabels.reduce((total, label) => (
       { ...total, [label.name]: label.color }
     ), {});
