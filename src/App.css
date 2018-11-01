@@ -2,6 +2,18 @@
   text-align: center;
 }
 
+.container {
+  display: flex;
+}
+
+.labels {
+  width: 20vw;
+}
+
+.chart {
+  width: 80vw;
+}
+
 option:hover {
   cursor: pointer;
   font-weight: bold;

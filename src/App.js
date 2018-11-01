@@ -169,44 +169,50 @@ class App extends Component {
         )}
         {this.state.chartLabels && (
           <Fragment>
-            <input
-              type="checkbox"
-              checked={this.state.isCheckboxChecked}
-              onChange={this.handleCheckboxChange}
-            />AND filter
-            <div>
-              {this.state.chartLabels.map(label => (
-                <option
-                  className={this.state.selectedLabels.includes(label.name) ? 'selected' : null}
-                  key={label.name}
-                  value={label.name}
-                  onClick={this.handleLabelChange}
-                >
-                  {label.name} ({label.issues.totalCount})
-              </option>
-              ))}
+            <div className="repo-info">
+              <input
+                type="checkbox"
+                checked={this.state.isCheckboxChecked}
+                onChange={this.handleCheckboxChange}
+              />AND filter
             </div>
-            <Line
-              data={this.getChartData()}
-              options={{
-                legend: {
-                  display: false,
-                },
-                tooltips: {
-                  intersect: false,
-                  mode: 'index',
-                },
-                scales: {
-                  xAxes: [{
-                    type: 'time',
-                    time: {
-                      unit: 'day',
-                      tooltipFormat: 'lll', // https://momentjs.com/
+            <div className="container">
+              <div className="chart">
+                <Line
+                  data={this.getChartData()}
+                  options={{
+                    legend: {
+                      display: false,
                     },
-                  }],
-                }
-              }}
-            />
+                    tooltips: {
+                      intersect: false,
+                      mode: 'index',
+                    },
+                    scales: {
+                      xAxes: [{
+                        type: 'time',
+                        time: {
+                          unit: 'day',
+                          tooltipFormat: 'lll', // https://momentjs.com/
+                        },
+                      }],
+                    }
+                  }}
+                />
+              </div>
+              <div className="labels">
+                {this.state.chartLabels.map(label => (
+                  <option
+                    className={this.state.selectedLabels.includes(label.name) ? 'selected' : null}
+                    key={label.name}
+                    value={label.name}
+                    onClick={this.handleLabelChange}
+                  >
+                    {label.name} ({label.issues.totalCount})
+                  </option>
+                ))}
+              </div>
+            </div>
           </Fragment>
         )}
       </div>
