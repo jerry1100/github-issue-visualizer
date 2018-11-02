@@ -92,19 +92,21 @@ class App extends Component {
           lineTension: 0,
           pointRadius: 0,
           pointHoverRadius: 0,
-          data: this.times.map(time => (
-            this.issues.filter(issue => {
-              if (new Date(time) < new Date(issue.createdAt)) {
-                return false;
-              }
-              if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
-                return false;
-              }
-              return this.state.selectedLabels.every(selectedLabel => (
-                issue.labels.some(issueLabel => issueLabel === selectedLabel)
-              ));
-            }).length
-          )),
+          data: !this.state.selectedLabels.length
+            ? []
+            : this.times.map(time => (
+              this.issues.filter(issue => {
+                if (new Date(time) < new Date(issue.createdAt)) {
+                  return false;
+                }
+                if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
+                  return false;
+                }
+                return this.state.selectedLabels.every(selectedLabel => (
+                  issue.labels.some(issueLabel => issueLabel === selectedLabel)
+                ));
+              }).length
+            )),
         }],
       };
     }
