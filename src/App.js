@@ -195,7 +195,6 @@ class App extends Component {
           <div className="labels">
             <h2>Labels</h2>
             <input
-              className="andFilter"
               type="checkbox"
               checked={this.state.isCheckboxChecked}
               onChange={this.handleCheckboxChange}
