@@ -18,6 +18,7 @@ class App extends Component {
     chartLabels: null,
     selectedLabels: [],
     isCheckboxChecked: false,
+    isLoading: false,
   }
 
   handleRepoURLChange = event => {
@@ -40,6 +41,8 @@ class App extends Component {
   }
 
   getIssues = async () => {
+    this.setState({ isLoading: true });
+
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
     [this.labels, this.issues] = await Promise.all([
@@ -77,6 +80,7 @@ class App extends Component {
     // Finish up
     this.chartData = {};
     this.setState({
+      isLoading: false,
       numOpenIssues,
       repoURL: `https://${repoURL}`,
       chartLabels: Object.keys(this.labels).sort((a, b) => a.localeCompare(b)),
@@ -151,6 +155,67 @@ class App extends Component {
     };
   }
 
+  renderChartArea = () => {
+    if (!this.state.isLoading && !this.state.chartLabels) {
+      return <div>Enter your GitHub token and let's get started!</div>
+    }
+    if (this.state.isLoading || !this.state.chartLabels) {
+      return <div>Loading...</div>;
+    }
+
+    return (
+      <Fragment>
+        <div>
+          There are {this.state.numOpenIssues} open issues
+            </div>
+        <div className="container">
+          <div className="chart">
+            <Line
+              data={this.getChartData()}
+              options={{
+                legend: {
+                  display: false,
+                },
+                tooltips: {
+                  position: 'custom',
+                  intersect: false,
+                  mode: 'index',
+                },
+                scales: {
+                  xAxes: [{
+                    type: 'time',
+                    time: {
+                      tooltipFormat: 'll', // https://momentjs.com/
+                    },
+                  }],
+                }
+              }}
+            />
+          </div>
+          <div className="labels">
+            <h2>Labels</h2>
+            <input
+              className="andFilter"
+              type="checkbox"
+              checked={this.state.isCheckboxChecked}
+              onChange={this.handleCheckboxChange}
+            />Use AND Filter
+            {this.state.chartLabels.map(chartLabel => (
+              <option
+                className={this.state.selectedLabels.includes(chartLabel) ? 'selected' : null}
+                key={chartLabel}
+                value={chartLabel}
+                onClick={this.handleLabelChange}
+              >
+                {chartLabel} ({this.labels[chartLabel].issues.totalCount})
+              </option>
+            ))}
+          </div>
+        </div>
+      </Fragment>
+    );
+  }
+
   render() {
     return (
       <div className="App">
@@ -165,57 +230,7 @@ class App extends Component {
           placeholder="API key"
         />
         <button onClick={this.getIssues}>Submit</button>
-        {this.state.chartLabels && (
-          <Fragment>
-            <div>
-              There are {this.state.numOpenIssues} open issues
-            </div>
-            <div className="container">
-              <div className="chart">
-                <Line
-                  data={this.getChartData()}
-                  options={{
-                    legend: {
-                      display: false,
-                    },
-                    tooltips: {
-                      position: 'custom',
-                      intersect: false,
-                      mode: 'index',
-                    },
-                    scales: {
-                      xAxes: [{
-                        type: 'time',
-                        time: {
-                          tooltipFormat: 'll', // https://momentjs.com/
-                        },
-                      }],
-                    }
-                  }}
-                />
-              </div>
-              <div className="labels">
-                <h2>Labels</h2>
-                <input
-                  className="andFilter"
-                  type="checkbox"
-                  checked={this.state.isCheckboxChecked}
-                  onChange={this.handleCheckboxChange}
-                />Use AND Filter
-                {this.state.chartLabels.map(chartLabel => (
-                  <option
-                    className={this.state.selectedLabels.includes(chartLabel) ? 'selected' : null}
-                    key={chartLabel}
-                    value={chartLabel}
-                    onClick={this.handleLabelChange}
-                  >
-                    {chartLabel} ({this.labels[chartLabel].issues.totalCount})
-                  </option>
-                ))}
-              </div>
-            </div>
-          </Fragment>
-        )}
+        {this.renderChartArea()}
       </div>
     );
   }
