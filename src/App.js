@@ -1,7 +1,14 @@
 import React, { Component, Fragment } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Line, Chart } from 'react-chartjs-2';
 import { fetchAllLabels, fetchAllIssues } from './util/github-util';
 import './App.css';
+
+Chart.Tooltip.positioners.custom = (elements, position) => {
+  return {
+    x: position.x,
+    y: position.y,
+  };
+};
 
 class App extends Component {
   state = {
@@ -181,6 +188,7 @@ class App extends Component {
                       display: false,
                     },
                     tooltips: {
+                      position: 'custom',
                       intersect: false,
                       mode: 'index',
                     },
