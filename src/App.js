@@ -1,13 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import { Line } from 'react-chartjs-2';
-import { fetchTotalOpenIssues, fetchIssues, fetchLabels } from './util/github-util';
+import { fetchAllLabels, fetchAllIssues } from './util/github-util';
 import './App.css';
 
 class App extends Component {
   state = {
     repoURL: window.localStorage.getItem('repo_url') || '',
     apiKey: window.localStorage.getItem('api_key') || '',
-    totalOpenIssues: null,
+    numOpenIssues: null,
     chartLabels: null,
     selectedLabels: [],
     isCheckboxChecked: false,
@@ -34,54 +34,46 @@ class App extends Component {
 
   getIssues = async () => {
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
-    const githubOptions = { domain, owner, name, apiKey: this.state.apiKey, maxRequests: 1 };
-    const results = await Promise.all([
-      fetchTotalOpenIssues(githubOptions),
-      fetchIssues(githubOptions),
-      fetchLabels(githubOptions),
+    const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
+    [this.labels, this.issues] = await Promise.all([
+      fetchAllLabels(githubOptions),
+      fetchAllIssues(githubOptions),
     ]);
 
-    // Save data for generating charts later
-    const totalOpenIssues = results[0];
-    this.fetchedIssues = results[1]
-    this.fetchedLabels = results[2];
-    this.chartData = {};
+    // Convert fetched labels into an object for easier access
+    const labelsObj = {};
+    this.labels.forEach(({ name, ...props }) => { labelsObj[name] = props });
+    this.labels = labelsObj;
 
-    // Remove labels that aren't in any issues
-    this.fetchedLabels = this.fetchedLabels.filter(label => (
-      this.fetchedIssues.some(issue => (
-        issue.labels.nodes.some(({ name }) => name === label.name)
-      ))
-    ));
-
-    // Mock a "total issues" label for displaying all the issues
-    this.fetchedLabels.unshift({
-      name: 'total issues',
-      color: '0366d6',
-      issues: { totalCount: totalOpenIssues },
+    // Get a list of times and count the number of open issues
+    // TODO: think about splitting the logic up? Will it hurt performance?
+    const timesObj = {};
+    let numOpenIssues = 0;
+    this.issues.forEach(issue => {
+      const round = time => new Date(new Date(time).toDateString()).toISOString();
+      timesObj[round(issue.createdAt)] = null;
+      if (issue.closedAt) {
+        timesObj[round(issue.closedAt)] = null;
+      } else {
+        numOpenIssues += 1;
+      }
     });
+    this.times = Object.keys(timesObj).concat(new Date().toISOString()); // include current time
+    this.times.sort((a, b) => new Date(a) - new Date(b)); // make sure it's in chronological order
 
-    // Save the label colors to use as the line colors
-    this.labelColors = this.fetchedLabels.reduce((total, label) => (
-      { ...total, [label.name]: label.color }
-    ), {});
+    // Mock a "__total" label for displaying all the issues
+    this.labels.__total = {
+      color: '0366d6',
+      issues: { totalCount: numOpenIssues },
+    };
 
-    // Extract createdAt/closedAt times from issues
-    const allTimes = this.fetchedIssues.reduce((total, issue) => (
-      total.concat(issue.createdAt, issue.closedAt || [])
-    ), []);
-
-    // Round times to nearest day, remove duplicates, and sort chronologically
-    this.times = Array.from(new Set(allTimes.map(time => (
-      new Date(new Date(time).toDateString()).toISOString()
-    )))).concat(new Date().toISOString()); // include current time
-    this.times.sort((a, b) => new Date(a) - new Date(b));
-
+    // Finish up
+    this.chartData = {};
     this.setState({
-      totalOpenIssues,
+      numOpenIssues,
       repoURL: `https://${repoURL}`,
-      chartLabels: [...this.fetchedLabels],
-      selectedLabels: ['total issues'],
+      chartLabels: Object.keys(this.labels).sort((a, b) => a.localeCompare(b)),
+      selectedLabels: ['__total'],
     }, () => {
       window.localStorage.setItem('repo_url', this.state.repoURL);
       window.localStorage.setItem('api_key', this.state.apiKey);
@@ -101,15 +93,15 @@ class App extends Component {
           pointRadius: 0,
           pointHoverRadius: 0,
           data: this.times.map(time => (
-            this.fetchedIssues.filter(issue => {
+            this.issues.filter(issue => {
               if (new Date(time) < new Date(issue.createdAt)) {
                 return false;
               }
               if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
                 return false;
               }
-              return this.state.selectedLabels.every(label => (
-                issue.labels.nodes.some(({ name }) => name === label)
+              return this.state.selectedLabels.every(selectedLabel => (
+                issue.labels.some(issueLabel => issueLabel === selectedLabel)
               ));
             }).length
           )),
@@ -119,33 +111,30 @@ class App extends Component {
 
     // For each selected label, generate the chart data if didn't already
     this.state.selectedLabels.filter(label => !this.chartData[label])
-      .map(label => this.fetchedLabels.find(({ name }) => name === label))
-      .forEach(label => {
-        const values = this.times.map(time => (
-          this.fetchedIssues.filter(issue => {
+      .forEach(labelToGenerate => {
+        this.chartData[labelToGenerate] = this.times.map(time => (
+          this.issues.filter(issue => {
             if (new Date(time) < new Date(issue.createdAt)) {
               return false;
             }
             if (issue.closedAt && new Date(time) >= new Date(issue.closedAt)) {
               return false;
             }
-            if (label.name === 'total issues') {
+            if (labelToGenerate === '__total') {
               return true;
             }
-            return issue.labels.nodes.some(issueLabel => issueLabel.name === label.name);
+            return issue.labels.some(issueLabel => issueLabel === labelToGenerate);
           }).length
         ));
-        const offset = label.issues.totalCount - values[values.length - 1];
-        this.chartData[label.name] = values.map(point => point + offset);
       });
 
     return {
       labels: this.times,
-      datasets: this.state.selectedLabels.map(label => ({
-        label,
-        data: this.chartData[label],
+      datasets: this.state.selectedLabels.map(selectedLabel => ({
+        label: selectedLabel,
+        data: this.chartData[selectedLabel],
+        borderColor: `#${this.labels[selectedLabel].color}`,
         fill: false,
-        borderColor: `#${this.labelColors[label]}`,
         lineTension: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -167,9 +156,9 @@ class App extends Component {
           placeholder="API key"
         />
         <button onClick={this.getIssues}>Submit</button>
-        {this.state.totalOpenIssues && (
+        {this.state.numOpenIssues && (
           <div>
-            There are {this.state.totalOpenIssues} open issues
+            There are {this.state.numOpenIssues} open issues
           </div>
         )}
         {this.state.chartLabels && (
@@ -206,14 +195,14 @@ class App extends Component {
                 />
               </div>
               <div className="labels">
-                {this.state.chartLabels.map(label => (
+                {this.state.chartLabels.map(chartLabel => (
                   <option
-                    className={this.state.selectedLabels.includes(label.name) ? 'selected' : null}
-                    key={label.name}
-                    value={label.name}
+                    className={this.state.selectedLabels.includes(chartLabel) ? 'selected' : null}
+                    key={chartLabel}
+                    value={chartLabel}
                     onClick={this.handleLabelChange}
                   >
-                    {label.name} ({label.issues.totalCount})
+                    {chartLabel} ({this.labels[chartLabel].issues.totalCount})
                   </option>
                 ))}
               </div>
