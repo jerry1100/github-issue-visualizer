@@ -170,13 +170,6 @@ class App extends Component {
             <div>
               There are {this.state.numOpenIssues} open issues
             </div>
-            <div className="repo-info">
-              <input
-                type="checkbox"
-                checked={this.state.isCheckboxChecked}
-                onChange={this.handleCheckboxChange}
-              />AND filter
-            </div>
             <div className="container">
               <div className="chart">
                 <Line
@@ -202,6 +195,13 @@ class App extends Component {
                 />
               </div>
               <div className="labels">
+                <h2>Labels</h2>
+                <input
+                  className="andFilter"
+                  type="checkbox"
+                  checked={this.state.isCheckboxChecked}
+                  onChange={this.handleCheckboxChange}
+                />Use AND Filter
                 {this.state.chartLabels.map(chartLabel => (
                   <option
                     className={this.state.selectedLabels.includes(chartLabel) ? 'selected' : null}

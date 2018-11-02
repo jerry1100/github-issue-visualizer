@@ -4,10 +4,13 @@
 
 .container {
   display: flex;
+  height: 70vh;
 }
 
 .labels {
   width: 20vw;
+  height: inherit;
+  overflow: scroll;
 }
 
 .chart {
@@ -22,4 +25,8 @@ option:hover {
 option.selected {
   cursor: pointer;
   background: #accef7;
+}
+
+.andFilter{
+  margin-bottom: 1rem;
 }
