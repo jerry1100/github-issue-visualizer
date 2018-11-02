@@ -3,12 +3,31 @@ import { Line, Chart } from 'react-chartjs-2';
 import { fetchAllLabels, fetchAllIssues } from './util/github-util';
 import './App.css';
 
-Chart.Tooltip.positioners.custom = (elements, position) => {
-  return {
-    x: position.x,
-    y: position.y,
-  };
-};
+// The vertical line that follows the mouse (https://stackoverflow.com/a/45172506/8917446)
+const originalLine = Chart.controllers.line;
+Chart.controllers.line = Chart.controllers.line.extend({
+  draw: function (ease) {
+    originalLine.prototype.draw.call(this, ease);
+
+    if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+      var activePoint = this.chart.tooltip._active[0],
+        ctx = this.chart.ctx,
+        x = activePoint.tooltipPosition().x,
+        topY = this.chart.scales['y-axis-0'].top,
+        bottomY = this.chart.scales['y-axis-0'].bottom;
+
+      // draw line
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, topY);
+      ctx.lineTo(x, bottomY);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#07C';
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+});
 
 class App extends Component {
   state = {
@@ -183,7 +202,6 @@ class App extends Component {
                   display: false,
                 },
                 tooltips: {
-                  position: 'custom',
                   intersect: false,
                   mode: 'index',
                 },
