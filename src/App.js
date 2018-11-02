@@ -71,7 +71,7 @@ class App extends Component {
       let errorMessage = 'Failed to fetch issues';
       if (e.status && e.statusText) {
         errorMessage += `: ${e.status} ${e.statusText}. Double check your API key.`;
-      } else if (e[0].message) {
+      } else if (e[0] && e[0].message) {
         errorMessage += `: ${e[0].message}`;
       } else {
         errorMessage += '. Double check the repo URL and API key.'
