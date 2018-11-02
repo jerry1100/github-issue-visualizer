@@ -110,6 +110,9 @@ export async function fetchAllLabels(options) {
             nodes {
               name
               color
+              issues(states: OPEN) {
+                totalCount
+              }
             }
           }
         }
