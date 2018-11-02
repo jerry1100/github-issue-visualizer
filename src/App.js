@@ -188,8 +188,7 @@ class App extends Component {
                       xAxes: [{
                         type: 'time',
                         time: {
-                          unit: 'day',
-                          tooltipFormat: 'lll', // https://momentjs.com/
+                          tooltipFormat: 'll', // https://momentjs.com/
                         },
                       }],
                     }
