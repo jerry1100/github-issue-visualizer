@@ -165,13 +165,11 @@ class App extends Component {
           placeholder="API key"
         />
         <button onClick={this.getIssues}>Submit</button>
-        {this.state.numOpenIssues && (
-          <div>
-            There are {this.state.numOpenIssues} open issues
-          </div>
-        )}
         {this.state.chartLabels && (
           <Fragment>
+            <div>
+              There are {this.state.numOpenIssues} open issues
+            </div>
             <div className="repo-info">
               <input
                 type="checkbox"
