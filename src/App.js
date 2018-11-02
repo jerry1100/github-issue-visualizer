@@ -228,7 +228,7 @@ class App extends Component {
           <input
             value={this.state.apiKey}
             onChange={this.handleApiKeyChange}
-            placeholder="API key"
+            placeholder="API Key"
           />
           <button onClick={this.getIssues}>Submit</button>
         </div>
