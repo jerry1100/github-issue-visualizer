@@ -38,6 +38,7 @@ class App extends Component {
     selectedLabels: [],
     isCheckboxChecked: false,
     isLoading: false,
+    errorMessage: null,
   }
 
   handleRepoURLChange = event => {
@@ -64,10 +65,19 @@ class App extends Component {
 
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
-    [this.labels, this.issues] = await Promise.all([
-      fetchAllLabels(githubOptions),
-      fetchAllIssues(githubOptions),
-    ]);
+    try {
+      [this.labels, this.issues] = await Promise.all([fetchAllLabels(githubOptions), fetchAllIssues(githubOptions)]);
+    } catch (e) {
+      let errorMessage = 'Failed to fetch issues';
+      if (e.status && e.statusText) {
+        errorMessage += `: ${e.status} ${e.statusText}. Double check your API key.`;
+      } else if (e[0].message) {
+        errorMessage += `: ${e[0].message}`;
+      } else {
+        errorMessage += '. Double check the repo URL and API key.'
+      }
+      return this.setState({ errorMessage });
+    }
 
     // Convert fetched labels into an object for easier access
     const labelsObj = {};
@@ -255,7 +265,9 @@ class App extends Component {
           />
           <button onClick={this.getIssues}>Submit</button>
         </div>
-        {this.renderChartArea()}
+        {this.state.errorMessage
+          ? <div>{this.state.errorMessage}</div>
+          : this.renderChartArea()}
       </div>
     );
   }
