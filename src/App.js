@@ -165,9 +165,9 @@ class App extends Component {
 
     return (
       <Fragment>
-        <div>
+        <div className="status">
           There are {this.state.numOpenIssues} open issues
-            </div>
+        </div>
         <div className="container">
           <div className="chart">
             <Line
