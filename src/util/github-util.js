@@ -90,53 +90,43 @@ export async function fetchIssues(options) {
 }
 
 /**
- * Recursively fetches a repository's labels and the # of issues open for each label
+ * Recursively fetches a repository's labels
  * @param {object} options Request options
  */
-export async function fetchLabels(options) {
-  const response = await fetch(`https://api.${options.domain}/graphql`, {
+export async function fetchAllLabels(options) {
+  const { domain, owner, name, apiKey, after } = options;
+
+  const data = await fetch(`https://api.${domain}/graphql`, {
     method: 'post',
-    headers: { 'Authorization': `Basic ${window.btoa(options.apiKey)}` },
+    headers: { 'Authorization': `Basic ${window.btoa(apiKey)}` },
     body: JSON.stringify({
-      query: `query($owner: String!, $name: String!, $before: String) {
+      query: `query($owner: String!, $name: String!, $after: String) {
         repository(owner: $owner, name: $name, ) {
-          labels(last: 100, before: $before) {
+          labels(first: 100, after: $after) {
             pageInfo {
-              hasPreviousPage
+              hasNextPage
               startCursor
             }
             nodes {
               name
               color
-              issues(states: OPEN) {
-                totalCount
-              }
             }
           }
         }
       }`,
-      variables: {
-        owner: options.owner,
-        name: options.name,
-        before: options.before,
-      },
+      variables: { owner, name, after },
     }),
-  }).then(response => response.json());
+  })
+    .then(response => response.json())
+    .then(response => !response.data ? Promise.reject(response) : response.data); // queries can fail
 
-  if (!response.data) {
-    throw Error(response);
-  }
-
-  const { nodes, pageInfo } = response.data.repository.labels;
+  const { nodes, pageInfo } = data.repository.labels;
 
   if (!pageInfo.hasPreviousPage) {
     return nodes;
   }
 
-  return (await fetchLabels({
-    ...options,
-    before: pageInfo.startCursor,
-  })).concat(nodes);
+  return nodes.concat(await fetchAllLabels({ ...options, after: pageInfo.endCursor }));
 }
 
 /**
