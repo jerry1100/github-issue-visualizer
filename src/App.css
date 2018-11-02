@@ -53,3 +53,9 @@ option.selected {
   cursor: pointer;
   background: #accef7;
 }
+
+.error {
+  text-align: center;
+  color: red;
+  font-size: 1.25rem;
+}

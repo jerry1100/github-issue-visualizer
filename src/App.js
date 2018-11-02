@@ -266,7 +266,7 @@ class App extends Component {
           <button onClick={this.getIssues}>Submit</button>
         </div>
         {this.state.errorMessage
-          ? <div>{this.state.errorMessage}</div>
+          ? <div className="error">{this.state.errorMessage}</div>
           : this.renderChartArea()}
       </div>
     );
