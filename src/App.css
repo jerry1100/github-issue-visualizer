@@ -1,7 +1,12 @@
+.App {
+  width: 95vw;
+  margin: auto;
+}
+
 .repo-info {
   height: 2rem;
   font-size: 2rem;
-  width: 100vw;
+  width: 100%;
   margin: 1rem 0;
   display: inline-flex;
   justify-content: center;
@@ -18,17 +23,19 @@
 
 .container {
   display: flex;
-  height: 70vh;
+  height: 68vh;
 }
 
 .labels {
-  width: 20vw;
+  width: 15%;
   height: inherit;
   overflow: scroll;
+  border: 1px solid #d2d2d2;
+  padding-left: 1rem;
 }
 
 .chart {
-  width: 80vw;
+  width: 85%;
 }
 
 option:hover {
