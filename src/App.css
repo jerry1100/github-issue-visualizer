@@ -1,4 +1,18 @@
-.App {
+.repo-info {
+  height: 2rem;
+  font-size: 2rem;
+  width: 100vw;
+  margin: 1rem 0;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.repo-info > input {
+  width: 35%;
+  margin-right: 2rem;
+}
+
+.status {
   text-align: center;
 }
 

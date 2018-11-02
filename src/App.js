@@ -157,10 +157,10 @@ class App extends Component {
 
   renderChartArea = () => {
     if (!this.state.isLoading && !this.state.chartLabels) {
-      return <div>Enter your GitHub token and let's get started!</div>
+      return <div className="status">Enter your GitHub token and let's get started!</div>
     }
     if (this.state.isLoading || !this.state.chartLabels) {
-      return <div>Loading...</div>;
+      return <div className="status">Loading...</div>;
     }
 
     return (
@@ -219,17 +219,19 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <input
-          value={this.state.repoURL}
-          onChange={this.handleRepoURLChange}
-          placeholder="Repo URL"
-        />
-        <input
-          value={this.state.apiKey}
-          onChange={this.handleApiKeyChange}
-          placeholder="API key"
-        />
-        <button onClick={this.getIssues}>Submit</button>
+        <div className="repo-info">
+          <input
+            value={this.state.repoURL}
+            onChange={this.handleRepoURLChange}
+            placeholder="Repo URL"
+          />
+          <input
+            value={this.state.apiKey}
+            onChange={this.handleApiKeyChange}
+            placeholder="API key"
+          />
+          <button onClick={this.getIssues}>Submit</button>
+        </div>
         {this.renderChartArea()}
       </div>
     );
