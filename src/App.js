@@ -132,7 +132,7 @@ class App extends Component {
       labels: this.times,
       datasets: this.state.selectedLabels.map(selectedLabel => ({
         label: selectedLabel,
-        data: this.chartData[selectedLabel],
+        data: [...this.chartData[selectedLabel]], // don't pass directly or original values will change
         borderColor: `#${this.labels[selectedLabel].color}`,
         fill: false,
         lineTension: 0,
