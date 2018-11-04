@@ -63,7 +63,11 @@ class App extends Component {
   getIssues = async () => {
     this.setState({ isLoading: true, errorMessage: null });
 
-    const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
+    const matchResults = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
+    if (!matchResults) {
+      return this.setState({ errorMessage: 'Could not read URL. Double check the repository URL.' });
+    }
+    const [repoURL, domain, owner, name] = matchResults;
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
     try {
       [this.labels, this.issues] = await Promise.all([fetchAllLabels(githubOptions), fetchAllIssues(githubOptions)]);
