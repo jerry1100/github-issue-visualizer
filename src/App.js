@@ -61,7 +61,7 @@ class App extends Component {
   }
 
   getIssues = async () => {
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, errorMessage: null });
 
     const [repoURL, domain, owner, name] = this.state.repoURL.match(/(github[^/]*)\/([^/]*)\/([^/&?]*)/);
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
