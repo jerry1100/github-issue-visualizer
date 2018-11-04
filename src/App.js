@@ -190,7 +190,7 @@ class App extends Component {
         <div className="status">
           <span>Enter your </span>
           <a target="_blank" rel="noopener noreferrer" href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/">GitHub token</a>
-          <span> to get started.</span>
+          <span> with the "repo" scope to get started.</span>
         </div>
       );
     }
