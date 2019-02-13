@@ -1,13 +1,13 @@
 {
-  "main.css": "/github-issue-visualizer/static/css/main.24a27e15.chunk.css",
-  "main.js": "/github-issue-visualizer/static/js/main.bf0819de.chunk.js",
-  "main.js.map": "/github-issue-visualizer/static/js/main.bf0819de.chunk.js.map",
+  "main.css": "/github-issue-visualizer/static/css/main.b5e9c957.chunk.css",
+  "main.js": "/github-issue-visualizer/static/js/main.4131380f.chunk.js",
+  "main.js.map": "/github-issue-visualizer/static/js/main.4131380f.chunk.js.map",
   "static/js/1.93935ce9.chunk.js": "/github-issue-visualizer/static/js/1.93935ce9.chunk.js",
   "static/js/1.93935ce9.chunk.js.map": "/github-issue-visualizer/static/js/1.93935ce9.chunk.js.map",
   "runtime~main.js": "/github-issue-visualizer/static/js/runtime~main.f9b9a153.js",
   "runtime~main.js.map": "/github-issue-visualizer/static/js/runtime~main.f9b9a153.js.map",
-  "static/css/main.24a27e15.chunk.css.map": "/github-issue-visualizer/static/css/main.24a27e15.chunk.css.map",
+  "static/css/main.b5e9c957.chunk.css.map": "/github-issue-visualizer/static/css/main.b5e9c957.chunk.css.map",
   "index.html": "/github-issue-visualizer/index.html",
-  "precache-manifest.fc41974b2c9680db19852aa13809c1e3.js": "/github-issue-visualizer/precache-manifest.fc41974b2c9680db19852aa13809c1e3.js",
+  "precache-manifest.9ff9b9a89565f2b77de80211ad4de373.js": "/github-issue-visualizer/precache-manifest.9ff9b9a89565f2b77de80211ad4de373.js",
   "service-worker.js": "/github-issue-visualizer/service-worker.js"
 }
