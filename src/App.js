@@ -50,9 +50,10 @@ class App extends Component {
   }
 
   handleLabelChange = event => {
-    const selectedLabels = this.state.selectedLabels.includes(event.target.value)
-      ? this.state.selectedLabels.filter(label => label !== event.target.value)
-      : this.state.selectedLabels.concat(event.target.value);
+    const clickedLabel = event.target.dataset.label;
+    const selectedLabels = this.state.selectedLabels.includes(clickedLabel)
+      ? this.state.selectedLabels.filter(label => label !== clickedLabel)
+      : this.state.selectedLabels.concat(clickedLabel);
     this.setState({ selectedLabels });
   }
 
@@ -238,14 +239,14 @@ class App extends Component {
               onChange={this.handleCheckboxChange}
             />Use AND Filter
             {this.state.chartLabels.map(chartLabel => (
-              <option
-                className={this.state.selectedLabels.includes(chartLabel) ? 'selected' : null}
+              <div
+                className={`label ${this.state.selectedLabels.includes(chartLabel) ? 'selected' : ''}`}
                 key={chartLabel}
-                value={chartLabel}
+                data-label={chartLabel}
                 onClick={this.handleLabelChange}
               >
                 {chartLabel} ({this.labels[chartLabel].issues.totalCount})
-              </option>
+              </div>
             ))}
           </div>
         </div>

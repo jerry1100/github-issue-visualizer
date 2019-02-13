@@ -44,12 +44,12 @@
   width: 85%;
 }
 
-option:hover {
+.label:hover {
   cursor: pointer;
   font-weight: bold;
 }
 
-option.selected {
+.label.selected {
   cursor: pointer;
   background: #accef7;
 }
