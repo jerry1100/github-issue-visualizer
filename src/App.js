@@ -38,6 +38,7 @@ class App extends Component {
     selectedLabels: [],
     isCheckboxChecked: false,
     isLoading: false,
+    loadingPercentage: 0,
     errorMessage: null,
   }
 
@@ -71,7 +72,10 @@ class App extends Component {
     const [repoURL, domain, owner, name] = matchResults;
     const githubOptions = { domain, owner, name, apiKey: this.state.apiKey };
     try {
-      [this.labels, this.issues] = await Promise.all([fetchAllLabels(githubOptions), fetchAllIssues(githubOptions)]);
+      [this.labels, this.issues] = await Promise.all([
+        fetchAllLabels(githubOptions),
+        fetchAllIssues(githubOptions, loadingPercentage => this.setState({ loadingPercentage })),
+      ]);
     } catch (e) {
       let errorMessage = 'Failed to fetch issues';
       if (e.status && e.statusText) {
@@ -115,6 +119,7 @@ class App extends Component {
     this.chartData = {};
     this.setState({
       isLoading: false,
+      loadingPercentage: 0,
       numOpenIssues,
       repoURL: `https://${repoURL}`,
       chartLabels: Object.keys(this.labels).sort((a, b) => a.localeCompare(b)),
@@ -200,7 +205,7 @@ class App extends Component {
       );
     }
     if (this.state.isLoading || !this.state.chartLabels) {
-      return <div className="status">Loading...</div>;
+      return <div className="status">Loading...({this.state.loadingPercentage}%)</div>;
     }
 
     return (

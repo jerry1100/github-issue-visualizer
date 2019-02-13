@@ -44,8 +44,9 @@ export async function fetchAllLabels(options) {
 /**
  * Fetches all of a repo's issues
  * @param {object} options Request options
+ * @param {function} setLoadingPercentage Callback to update loading percentage
  */
-export async function fetchAllIssues(options) {
+export async function fetchAllIssues(options, setLoadingPercentage) {
   const { domain, owner, name, apiKey } = options;
 
   // Get the total number of issues and PRs
@@ -72,6 +73,7 @@ export async function fetchAllIssues(options) {
     .then(({ repository }) => repository.issues.totalCount + repository.pullRequests.totalCount);
 
   // Send requests in parallel to retrieve all the issues
+  let numLoaded = 0;
   const numPagesNeeded = Math.ceil(numIssuesAndPRs / 100);
   const pageNumbers = [...Array(numPagesNeeded).keys()].map(index => index + 1); // [1...numPagesNeeded]
   const results = await Promise.all(pageNumbers.map(pageNumber => (
@@ -80,6 +82,11 @@ export async function fetchAllIssues(options) {
     })
       .then(response => !response.ok ? Promise.reject(response) : response.json())
       .then(response => response.filter(data => !data.pull_request)) // filter out pull requests
+      .then(data => {
+        numLoaded += 1;
+        setLoadingPercentage(Math.floor(numLoaded / numPagesNeeded * 100));
+        return data;
+      })
   )));
 
   // Flatten results into a single array
