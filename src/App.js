@@ -263,6 +263,7 @@ class App extends Component {
             placeholder="Repo URL"
           />
           <input
+            type="password"
             value={this.state.apiKey}
             onChange={this.handleApiKeyChange}
             placeholder="API Key"
